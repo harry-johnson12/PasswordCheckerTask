@@ -6,6 +6,8 @@
 #OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make it resizable
 
 import customtkinter as ctk
+import hashlib
+import requests
 
 WIDTH = 600
 HEIGHT = 400
@@ -50,11 +52,29 @@ class App(ctk.CTk):
 
 class Password_checker:
     def __init__(self):
-        self.password = None
-    
+        self.password = ""  # Default password for testing purposes
+
+    def password_breaches(self):
+        hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
+        password_hash_prefix, password_hash_suffix = hash[:5], hash[5:] # Split the hash into prefix and suffix
+        url = f"https://api.pwnedpasswords.com/range/{password_hash_prefix}" # API takes the first 5 characters of the SHA-1 hash
+        response = requests.get(url)
+        if response.status_code != 200:
+            raise RuntimeError(f"Error fetching data: {response.status_code}")
+        for line in response.text.splitlines():
+            current_hash_suffix, breach_count = line.split(":") # each line contains the hash suffix and the count of breaches
+            if current_hash_suffix == password_hash_suffix: #if the suffix matches the password's suffix, return True and the amount of breaches
+                return int(breach_count)
+        return 0 # if the suffix of the passwords hash was not found, return 0 breaches
+
+    def check_password_strength(self):
+        self.password_breaches()
+
     def update_password(self):
         self.password = app.password_entry.get()
         app.password_entry.delete(0, ctk.END)
+        self.check_password_strength()
+
 
 password_checker = Password_checker()
 app = App()
