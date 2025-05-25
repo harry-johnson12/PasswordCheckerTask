@@ -13,6 +13,7 @@ WIDTH = 600
 HEIGHT = 400
 FONT = "Helvetica Neue Medium"
 CORNER_RADIUS = 3
+PLACEHOLDER_TEXT_SIZE = 15
 
 class App(ctk.CTk):
     def __init__(self):
@@ -33,7 +34,7 @@ class App(ctk.CTk):
                 self.show_button.configure(text="Show")
 
         #instantiate the GUI elements
-        self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, 15))
+        self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
         self.show_button = ctk.CTkButton(self, text="Show", command=show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
@@ -53,6 +54,7 @@ class App(ctk.CTk):
 class Password_checker:
     def __init__(self):
         self.password = ""  # Default password for testing purposes
+        self.breaches = 0  # Default breaches count
 
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
@@ -68,12 +70,17 @@ class Password_checker:
         return 0 # if the suffix of the passwords hash was not found, return 0 breaches
 
     def check_password_strength(self):
-        self.password_breaches()
+        self.breaches = self.password_breaches()
+        print()
 
     def update_password(self):
-        self.password = app.password_entry.get()
-        app.password_entry.delete(0, ctk.END)
-        self.check_password_strength()
+        if not app.password_entry.get() == "":
+            self.password = app.password_entry.get()
+            app.password_entry.delete(0, 'end')  # Clear the entry field after getting the password
+            self.check_password_strength()
+        else:
+            print("Please enter a password.")
+            print("FIX THIS FOR UI LATER")
 
 
 password_checker = Password_checker()
