@@ -1,7 +1,6 @@
-
 #IDEAS(GUI): settings, help, customise for light/dark mode
 
-#IDEAS(SECURITY): password strength/breach checker - length check, character diversity, common password list, api breaches, overall score out of 100
+#IDEAS(SECURITY): password strength/breach checker - length check, character diversity, overall score out of 100
 
 #OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make it resizable
 
@@ -53,8 +52,21 @@ class App(ctk.CTk):
 
 class Password_checker:
     def __init__(self):
-        self.password = ""  # Default password for testing purposes
-        self.breaches = 0  # Default breaches count
+        self.password = ""
+        self.password_length = len(self.password)
+        self.breaches = 0
+        self.common = False
+        self.score = 100
+        self.password_issues = []
+        self.common_passwords = set()
+        self.load_common_passwords()
+
+    def load_common_passwords(self, path="rockyou.txt"):
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as rockyou_file:
+                self.common_passwords = set(line.strip() for line in rockyou_file)
+        except FileNotFoundError:
+            print("rockyou.txt not found. Common password check will be disabled.")
 
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
@@ -62,25 +74,50 @@ class Password_checker:
         url = f"https://api.pwnedpasswords.com/range/{password_hash_prefix}" # API takes the first 5 characters of the SHA-1 hash
         response = requests.get(url)
         if response.status_code != 200:
-            raise RuntimeError(f"Error fetching data: {response.status_code}")
+            print("Network error")#raise RuntimeError(f"Error fetching data: {response.status_code}")
         for line in response.text.splitlines():
             current_hash_suffix, breach_count = line.split(":") # each line contains the hash suffix and the count of breaches
             if current_hash_suffix == password_hash_suffix: #if the suffix matches the password's suffix, return True and the amount of breaches
                 return int(breach_count)
         return 0 # if the suffix of the passwords hash was not found, return 0 breaches
 
+    def check_common_passwords(self):
+        return self.password in self.common_passwords
+
+    def regular_checks(self):
+        if self.password_length < 16:
+            #score = 100 - (16 - len(self.password)) * 5
+            self.password_issues.append(f"Your password is just {self.password_length} characters long. To maximise complexity should be at least 16 characters.")
+             
+        if not any(char.isdigit() for char in self.password):
+            "Password must contain at least one digit."
+
+        if not any(char.isalpha() for char in self.password):
+            "Password must contain at least one letter."
+
+        if not any(char.isupper() for char in self.password):
+            "Password must contain at least one uppercase letter."
+
+        if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
+            "Password must contain at least one special character."
+
+
     def check_password_strength(self):
         self.breaches = self.password_breaches()
-        print()
+        self.common = self.check_common_passwords()
+        self.regular_checks()
+        print(self.breaches, self.common)
 
     def update_password(self):
         if not app.password_entry.get() == "":
             self.password = app.password_entry.get()
+            self.password_length = len(self.password)
             app.password_entry.delete(0, 'end')  # Clear the entry field after getting the password
+            app.password_entry.configure(show="*")
+            self.score = 100
             self.check_password_strength()
         else:
-            print("Please enter a password.")
-            print("FIX THIS FOR UI LATER")
+            print("Please enter a password. Add this to the UI later")
 
 
 password_checker = Password_checker()
