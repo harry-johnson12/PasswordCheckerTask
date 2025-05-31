@@ -7,6 +7,7 @@
 import customtkinter as ctk
 import hashlib
 import requests
+import math
 
 WIDTH = 600
 HEIGHT = 400
@@ -72,42 +73,40 @@ class Password_checker:
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
         password_hash_prefix, password_hash_suffix = hash[:5], hash[5:] # Split the hash into prefix and suffix
         url = f"https://api.pwnedpasswords.com/range/{password_hash_prefix}" # API takes the first 5 characters of the SHA-1 hash
-        response = requests.get(url)
-        if response.status_code != 200:
-            print("Network error")#raise RuntimeError(f"Error fetching data: {response.status_code}")
-        for line in response.text.splitlines():
-            current_hash_suffix, breach_count = line.split(":") # each line contains the hash suffix and the count of breaches
-            if current_hash_suffix == password_hash_suffix: #if the suffix matches the password's suffix, return True and the amount of breaches
-                return int(breach_count)
-        return 0 # if the suffix of the passwords hash was not found, return 0 breaches
+        try:
+            response = requests.get(url)
+            for line in response.text.splitlines():
+                current_hash_suffix, breach_count = line.split(":") # each line contains the hash suffix and the count of breaches
+                if current_hash_suffix == password_hash_suffix: #if the suffix matches the password's suffix, return True and the amount of breaches
+                    if int(breach_count) > 0:
+                        self.password_issues.append(f"Your password has been found in {breach_count} data breaches. DO NOT use this password!")
+                        self.score -= 100
+                    return int(breach_count)
+            return 0 # if the suffix of the passwords hash was not found, return 0 breaches
+        except:
+                print("Error connecting to the API")
 
     def check_common_passwords(self):
+        if self.password in self.common_passwords:
+            self.password_issues.append("Your password is a common password, commonly used for brute attacks. DO NOT use this password!")
+            self.score -= 100
         return self.password in self.common_passwords
 
-    def regular_checks(self):
-        if self.password_length < 16:
-            #score = 100 - (16 - len(self.password)) * 5
-            self.password_issues.append(f"Your password is just {self.password_length} characters long. To maximise complexity should be at least 16 characters.")
-             
-        if not any(char.isdigit() for char in self.password):
-            "Password must contain at least one digit."
-
-        if not any(char.isalpha() for char in self.password):
-            "Password must contain at least one letter."
-
-        if not any(char.isupper() for char in self.password):
-            "Password must contain at least one uppercase letter."
-
-        if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
-            "Password must contain at least one special character."
+    def length_penalty(self):
+        if self.password_length >= 16:
+            return 0
+        k = 0.25
+        penalty = 50 * math.exp(-k * (self.password_length - 8))
+        self.password_issues.append(f"Your password is just {self.password_length} characters long. To maximise complexity should be at least 16 characters.")
+        self.score -= round(min(penalty, 100), 2)
 
 
     def check_password_strength(self):
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
-        self.regular_checks()
-        print(self.breaches, self.common)
-
+        self.length_penalty()
+        #print(f"Score: {self.score}")
+        
     def update_password(self):
         if not app.password_entry.get() == "":
             self.password = app.password_entry.get()
@@ -123,3 +122,24 @@ class Password_checker:
 password_checker = Password_checker()
 app = App()
 app.mainloop()
+
+    
+"""if not any(char.isdigit() for char in self.password):
+        "Password must contain at least one digit."
+
+if not any(char.isalpha() for char in self.password):
+        "Password must contain at least one letter."
+
+if not any(char.isupper() for char in self.password):
+        "Password must contain at least one uppercase letter."
+
+if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
+        "Password must contain at least one special character."""
+
+
+"""
+lengths = ['1','11','111','1111','11111','111111','1111111','11111111','111111111','1111111111','11111111111','111111111111','1111111111111','11111111111111','111111111111111','1111111111111111']
+for i in range(0, len(lengths)):
+    password_checker.password = lengths[i] # Adding dummy common passwords for testing
+    password_checker.password_length = len(password_checker.password)
+    print(password_checker.length_penalty())"""
