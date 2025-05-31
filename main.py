@@ -1,8 +1,8 @@
 #IDEAS(GUI): settings, help, customise for light/dark mode
 
-#IDEAS(SECURITY): password strength/breach checker - length check, character diversity, overall score out of 100
+#IDEAS(SECURITY): patterns such as aaaaa 1234 ect, dictionary check how many words in the password
 
-#OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make it resizable
+#OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make the window resizable
 
 import customtkinter as ctk
 import hashlib
@@ -12,8 +12,8 @@ import math
 WIDTH = 600
 HEIGHT = 400
 FONT = "Helvetica Neue Medium"
-CORNER_RADIUS = 3
-PLACEHOLDER_TEXT_SIZE = 15
+CORNER_RADIUS = 4
+PLACEHOLDER_TEXT_SIZE = 13
 
 class App(ctk.CTk):
     def __init__(self):
@@ -48,7 +48,7 @@ class App(ctk.CTk):
         self.password_entry.place(relx=0.29, rely=0.24, anchor="sw")
         self.enter_button.place(relx=0.64, rely=0.24, anchor="sw")
         self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
-        self.password_strength_bar.place(relx=0.03, rely=0.33, anchor="sw")
+        self.password_strength_bar.place(relx=0.03, rely=0.32, anchor="sw")
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
@@ -58,6 +58,7 @@ class App(ctk.CTk):
 class Password_checker:
     def __init__(self):
         self.password = ""
+        self.saved_password = self.password
         self.password_length = len(self.password)
         self.breaches = 0
         self.common = False
@@ -108,28 +109,33 @@ class Password_checker:
         appending_issue = "Your password should contain a diverse range of characters. It is missing "
         if not any(char.isdigit() for char in self.password):
             appending_issue += "digits, "
-            self.score -= 10
+            self.score -= 15
         if not any(char.isalpha() for char in self.password):
-            appending_issue += "letters, "
-            self.score -= 10
+            appending_issue += "lowercase letters, "
+            self.score -= 5
         if not any(char.isupper() for char in self.password):
             appending_issue += "uppercase letters, "
             self.score -= 10
         if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
             appending_issue += "special characters, "
-            self.score -= 10
+            self.score -= 20
         if appending_issue != "Your password should contain a diverse range of characters. It is missing ":
             appending_issue = appending_issue[:-2] + "."
             self.password_issues.append(appending_issue)
         
     def check_password_strength(self):
+        self.password_issues = []
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
         self.length_penalty()
         self.check_password_character_diversity()
-        #entropy = self.entropy_check()
         if self.score < 0:
             self.score = 0
+        
+        print()
+        for issue in self.password_issues:
+            print(issue)
+            print()
         
         if self.score >= 80:
             bar_colour = "light green"
@@ -137,7 +143,7 @@ class Password_checker:
             bar_colour = "yellow"
         elif self.score >= 30:
             bar_colour = "orange"
-        elif self.score >= 0:
+        elif self.score > 0:
             bar_colour = "red"
         else:
             bar_colour = "light grey"
@@ -147,6 +153,7 @@ class Password_checker:
         
     def update_password(self):
         if not app.password_entry.get() == "":
+            self.saved_password = self.password  # Save the previous password
             self.password = app.password_entry.get()
             self.password_length = len(self.password)
             self.score = 100
@@ -157,23 +164,21 @@ class Password_checker:
         else:
             print("Please enter a password. Add this to the UI later")
 
-
 password_checker = Password_checker()
 app = App()
 app.mainloop()
 
-"""def entropy_check(self): # calculates the mathematical "guessabiltity" of the password 
-    charset = 0
-    if any(character.islower() for character in self.password): 
-        charset += 26 # how many possible characters are in the password
-    if any(character.isupper() for character in self.password): 
-        charset += 26
-    if any(character.isdigit() for character in self.password): 
-        charset += 10
-    if any(not character.isalnum() for character in self.password): 
-        charset += 32 # special characters
-    if charset == 0: return 0  # avoid math error if there is no password entered
-    entropy = round(len(self.password) * math.log2(charset)) # calculate the entropy of the password using the formula: length * log2(charset size)
-    removing_score = (90 - entropy)
-    print(removing_score)
-    return removing_score"""
+"""def entropy_check(self): # calculates the mathematical "guessabiltity" of the password based on the characters used and length
+        charset = 0
+        if any(character.islower() for character in self.password): 
+            charset += 26 # how many possible characters are in the password
+        if any(character.isupper() for character in self.password): 
+            charset += 26
+        if any(character.isdigit() for character in self.password): 
+            charset += 10
+        if any(not character.isalnum() for character in self.password): 
+            charset += 32 # special characters
+        if charset == 0: return 0  # avoid math error if there is no password entered
+        entropy = round(len(self.password) * math.log2(charset)) # calculate the entropy of the password using the formula: length * log2(charset size)
+        removing_score = (90 - entropy)
+        self.score -= removing_score"""
