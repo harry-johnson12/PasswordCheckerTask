@@ -37,14 +37,18 @@ class App(ctk.CTk):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
         self.show_button = ctk.CTkButton(self, text="Show", command=show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="light grey", progress_color="light grey", orientation="horizontal")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
+
+        self.password_strength_bar.set(0/100)  # Initialize the progress bar to 0
 
         #place the GUI elements
         self.password_entry.place(relx=0.29, rely=0.24, anchor="sw")
         self.enter_button.place(relx=0.64, rely=0.24, anchor="sw")
         self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
+        self.password_strength_bar.place(relx=0.03, rely=0.33, anchor="sw")
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
@@ -118,7 +122,6 @@ class Password_checker:
             appending_issue = appending_issue[:-2] + "."
             self.password_issues.append(appending_issue)
         
-
     def check_password_strength(self):
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
@@ -128,16 +131,28 @@ class Password_checker:
         if self.score < 0:
             self.score = 0
         
-        #print(f"Score: {self.score}")
+        if self.score >= 80:
+            bar_colour = "light green"
+        elif self.score >= 50: 
+            bar_colour = "yellow"
+        elif self.score >= 30:
+            bar_colour = "orange"
+        elif self.score >= 0:
+            bar_colour = "red"
+        else:
+            bar_colour = "light grey"
+
+        app.password_strength_bar.configure(progress_color=bar_colour)  # Change color based on score
+        app.password_strength_bar.set(self.score / 100)  # Update the progress bar with the score as a percentage
         
     def update_password(self):
         if not app.password_entry.get() == "":
             self.password = app.password_entry.get()
             self.password_length = len(self.password)
+            self.score = 100
             app.password_entry.delete(0, 'end')  # Clear the entry field after getting the password
             app.password_entry.configure(show="*")
             app.show_button.configure(text="Show")
-            self.score = 100
             self.check_password_strength()
         else:
             print("Please enter a password. Add this to the UI later")
