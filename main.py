@@ -79,7 +79,7 @@ class Password_checker:
                 current_hash_suffix, breach_count = line.split(":") # each line contains the hash suffix and the count of breaches
                 if current_hash_suffix == password_hash_suffix: #if the suffix matches the password's suffix, return True and the amount of breaches
                     if int(breach_count) > 0:
-                        self.password_issues.append(f"Your password has been found in {breach_count} data breaches. DO NOT use this password!")
+                        self.password_issues.append(f"Your password has been found in {breach_count} data breaches.")
                         self.score -= 100
                     return int(breach_count)
             return 0 # if the suffix of the passwords hash was not found, return 0 breaches
@@ -88,7 +88,7 @@ class Password_checker:
 
     def check_common_passwords(self):
         if self.password in self.common_passwords:
-            self.password_issues.append("Your password is a common password, commonly used for brute attacks. DO NOT use this password!")
+            self.password_issues.append("Your password is a common password, commonly used for brute attacks.")
             self.score -= 100
         return self.password in self.common_passwords
 
@@ -100,11 +100,34 @@ class Password_checker:
         self.password_issues.append(f"Your password is just {self.password_length} characters long. To maximise complexity should be at least 16 characters.")
         self.score -= round(min(penalty, 100), 2)
 
+    def check_password_character_diversity(self):
+        appending_issue = "Your password should contain a diverse range of characters. It is missing "
+        if not any(char.isdigit() for char in self.password):
+            appending_issue += "digits, "
+            self.score -= 10
+        if not any(char.isalpha() for char in self.password):
+            appending_issue += "letters, "
+            self.score -= 10
+        if not any(char.isupper() for char in self.password):
+            appending_issue += "uppercase letters, "
+            self.score -= 10
+        if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
+            appending_issue += "special characters, "
+            self.score -= 10
+        if appending_issue != "Your password should contain a diverse range of characters. It is missing ":
+            appending_issue = appending_issue[:-2] + "."
+            self.password_issues.append(appending_issue)
+        
 
     def check_password_strength(self):
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
         self.length_penalty()
+        self.check_password_character_diversity()
+        #entropy = self.entropy_check()
+        if self.score < 0:
+            self.score = 0
+        
         #print(f"Score: {self.score}")
         
     def update_password(self):
@@ -113,6 +136,7 @@ class Password_checker:
             self.password_length = len(self.password)
             app.password_entry.delete(0, 'end')  # Clear the entry field after getting the password
             app.password_entry.configure(show="*")
+            app.show_button.configure(text="Show")
             self.score = 100
             self.check_password_strength()
         else:
@@ -123,23 +147,18 @@ password_checker = Password_checker()
 app = App()
 app.mainloop()
 
-    
-"""if not any(char.isdigit() for char in self.password):
-        "Password must contain at least one digit."
-
-if not any(char.isalpha() for char in self.password):
-        "Password must contain at least one letter."
-
-if not any(char.isupper() for char in self.password):
-        "Password must contain at least one uppercase letter."
-
-if not any(char in "!@#$%^&*()-_=+[]{}|;:,.<>?/" for char in self.password):
-        "Password must contain at least one special character."""
-
-
-"""
-lengths = ['1','11','111','1111','11111','111111','1111111','11111111','111111111','1111111111','11111111111','111111111111','1111111111111','11111111111111','111111111111111','1111111111111111']
-for i in range(0, len(lengths)):
-    password_checker.password = lengths[i] # Adding dummy common passwords for testing
-    password_checker.password_length = len(password_checker.password)
-    print(password_checker.length_penalty())"""
+"""def entropy_check(self): # calculates the mathematical "guessabiltity" of the password 
+    charset = 0
+    if any(character.islower() for character in self.password): 
+        charset += 26 # how many possible characters are in the password
+    if any(character.isupper() for character in self.password): 
+        charset += 26
+    if any(character.isdigit() for character in self.password): 
+        charset += 10
+    if any(not character.isalnum() for character in self.password): 
+        charset += 32 # special characters
+    if charset == 0: return 0  # avoid math error if there is no password entered
+    entropy = round(len(self.password) * math.log2(charset)) # calculate the entropy of the password using the formula: length * log2(charset size)
+    removing_score = (90 - entropy)
+    print(removing_score)
+    return removing_score"""
