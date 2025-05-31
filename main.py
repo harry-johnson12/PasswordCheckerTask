@@ -37,7 +37,9 @@ class App(ctk.CTk):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
         self.show_button = ctk.CTkButton(self, text="Show", command=show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="light grey", progress_color="light grey", orientation="horizontal")
+        self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
+        self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
+        self.password_feedback = ctk.CTkTextbox(self, width=564, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
@@ -48,7 +50,9 @@ class App(ctk.CTk):
         self.password_entry.place(relx=0.29, rely=0.24, anchor="sw")
         self.enter_button.place(relx=0.64, rely=0.24, anchor="sw")
         self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
-        self.password_strength_bar.place(relx=0.03, rely=0.32, anchor="sw")
+        self.password_strength_bar.place(relx=0.03, rely=0.39, anchor="sw")
+        self.password_strength_label.place(relx=0.03, rely=0.34, anchor="sw")
+        self.password_feedback.place(relx=0.03, rely=0.72, anchor="sw")
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
@@ -60,6 +64,7 @@ class Password_checker:
         self.password = ""
         self.saved_password = self.password
         self.password_length = len(self.password)
+        self.password_strength = "Weak"
         self.breaches = 0
         self.common = False
         self.score = 100
@@ -93,7 +98,7 @@ class Password_checker:
 
     def check_common_passwords(self):
         if self.password in self.common_passwords:
-            self.password_issues.append("Your password is a common password, commonly used for brute attacks.")
+            self.password_issues.append("Your password is commonly used in brute force attacks.")
             self.score -= 100
         return self.password in self.common_passwords
 
@@ -102,7 +107,7 @@ class Password_checker:
             return 0
         k = 0.25
         penalty = 50 * math.exp(-k * (self.password_length - 8))
-        self.password_issues.append(f"Your password is just {self.password_length} characters long. To maximise complexity should be at least 16 characters.")
+        self.password_issues.append(f"Your password is just {self.password_length} characters long. To improve complexity should be at least 16 characters.")
         self.score -= round(min(penalty, 100), 2)
 
     def check_password_character_diversity(self):
@@ -132,25 +137,38 @@ class Password_checker:
         if self.score < 0:
             self.score = 0
         
-        print()
-        for issue in self.password_issues:
-            print(issue)
-            print()
-        
+        if self.score == 100:
+            bar_colour = "green"
+            app.password_strength_label.configure(text="Your password is incredibly strong.")
+        if self.score >= 90:
+            app.password_strength_label.configure(text="Your password section is very strong, to maximise security, view the below recomendations.")
         if self.score >= 80:
             bar_colour = "light green"
+            app.password_strength_label.configure(text="Your password is strong, to maximise security, view the below recomendations.")
         elif self.score >= 50: 
             bar_colour = "yellow"
+            app.password_strength_label.configure(text="Your password is average strength, view the issues below to improve your password.")
         elif self.score >= 30:
             bar_colour = "orange"
+            app.password_strength_label.configure(text="Your password is weak, change your password.")
         elif self.score > 0:
             bar_colour = "red"
+            app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
         else:
             bar_colour = "light grey"
+            app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
 
+        app.password_strength_bar.configure(fg_color="light grey")  # Set the background color of the progress bar
         app.password_strength_bar.configure(progress_color=bar_colour)  # Change color based on score
         app.password_strength_bar.set(self.score / 100)  # Update the progress bar with the score as a percentage
-        
+
+        app.password_feedback.configure(state="normal")  # Enable the textbox to update it 
+        app.password_feedback.delete("0.0", "end")  # Clear the textbox before inserting new issues
+        for issue in self.password_issues:
+            app.password_feedback.insert("end", issue + "\n")
+            app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
+        app.password_feedback.configure(state="disabled")  # Disable the textbox after updating it
+   
     def update_password(self):
         if not app.password_entry.get() == "":
             self.saved_password = self.password  # Save the previous password
