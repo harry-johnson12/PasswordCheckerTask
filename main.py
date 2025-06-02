@@ -185,18 +185,3 @@ class Password_checker:
 password_checker = Password_checker()
 app = App()
 app.mainloop()
-
-"""def entropy_check(self): # calculates the mathematical "guessabiltity" of the password based on the characters used and length
-        charset = 0
-        if any(character.islower() for character in self.password): 
-            charset += 26 # how many possible characters are in the password
-        if any(character.isupper() for character in self.password): 
-            charset += 26
-        if any(character.isdigit() for character in self.password): 
-            charset += 10
-        if any(not character.isalnum() for character in self.password): 
-            charset += 32 # special characters
-        if charset == 0: return 0  # avoid math error if there is no password entered
-        entropy = round(len(self.password) * math.log2(charset)) # calculate the entropy of the password using the formula: length * log2(charset size)
-        removing_score = (90 - entropy)
-        self.score -= removing_score"""
