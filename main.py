@@ -129,10 +129,10 @@ class Password_checker:
                     containing_words.append(word)
                     self.score -= 10
         if self.word_count > 0:
-            appending_feedback = "Your password contains:"
+            appending_feedback = "Your password contains: "
             for word in containing_words:
-                appending_feedback += f"'{word}',"
-            appending_feedback = appending_feedback[:-1] + "."
+                appending_feedback += f"'{word}', "
+            appending_feedback = appending_feedback[:-2] + "."
             appending_feedback += " This makes it easier to guess."
             self.password_issues.append(appending_feedback)
 
