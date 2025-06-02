@@ -69,8 +69,8 @@ class Password_checker:
         self.common = False
         self.score = 100
         self.password_issues = []
-        self.common_passwords = set()
         self.load_common_passwords()
+        self.load_dictionary_words()
 
     def load_common_passwords(self, path="rockyou.txt"):
         try:
@@ -79,6 +79,20 @@ class Password_checker:
         except FileNotFoundError:
             print("rockyou.txt not found. Common password check will be disabled.")
 
+    def load_dictionary_words(self, path="10,000_common_words.txt"):
+        try:
+            with open(path, "r", encoding="utf-8", errors="ignore") as dictionary_file:
+                clean_words = set()
+
+                for word in dictionary_file:
+                    stripped = word.strip()
+                    if len(stripped) >= 4:
+                        clean_words.add(stripped.lower())
+
+                self.dictionary_words = clean_words            
+        except FileNotFoundError:
+            print("words_alpha.txt not found. dictionary password check will be disabled.")
+        
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
         password_hash_prefix, password_hash_suffix = hash[:5], hash[5:] # Split the hash into prefix and suffix
@@ -94,13 +108,33 @@ class Password_checker:
                     return int(breach_count)
             return 0 # if the suffix of the passwords hash was not found, return 0 breaches
         except:
-                print("Error connecting to the API")
+                self.password_issues.append("There was an error connecting to the API, your passsword may or may not be compromised.")
 
     def check_common_passwords(self):
         if self.password in self.common_passwords:
             self.password_issues.append("Your password is commonly used in brute force attacks.")
             self.score -= 100
         return self.password in self.common_passwords
+
+    def check_for_dictionary_words(self):
+        self.word_count = 0
+        containing_words = []
+        for word in self.dictionary_words:
+            if word in self.password.lower():
+                if word == self.password.lower():
+                    self.password_issues.append(f"Your password is the just the word '{word}', which is not secure.")
+                    self.score -= 80
+                else: 
+                    self.word_count += 1
+                    containing_words.append(word)
+                    self.score -= 10
+        if self.word_count > 0:
+            appending_feedback = "Your password contains:"
+            for word in containing_words:
+                appending_feedback += f"'{word}',"
+            appending_feedback = appending_feedback[:-1] + "."
+            appending_feedback += " This makes it easier to guess."
+            self.password_issues.append(appending_feedback)
 
     def length_penalty(self):
         if self.password_length >= 16:
@@ -133,6 +167,7 @@ class Password_checker:
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
         self.length_penalty()
+        self.check_for_dictionary_words()
         self.check_password_character_diversity()
         if self.score < 0:
             self.score = 0
