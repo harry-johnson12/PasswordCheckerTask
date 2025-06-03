@@ -1,6 +1,6 @@
-#IDEAS(GUI): settings, help, customise for light/dark mode
+#IDEAS(GUI): settings, help, about, customise for light/dark mode
 
-#IDEAS(SECURITY): patterns such as aaaaa 1234 ect, dictionary check how many words in the password
+#IDEAS(SECURITY): patterns such as aaaaa 1234 ect
 
 #OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make the window resizable
 
@@ -12,7 +12,7 @@ import math
 WIDTH = 600
 HEIGHT = 400
 FONT = "Helvetica Neue Medium"
-CORNER_RADIUS = 4
+CORNER_RADIUS = 3
 PLACEHOLDER_TEXT_SIZE = 13
 
 class App(ctk.CTk):
@@ -39,7 +39,7 @@ class App(ctk.CTk):
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
-        self.password_feedback = ctk.CTkTextbox(self, width=564, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
+        self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
@@ -52,7 +52,7 @@ class App(ctk.CTk):
         self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
         self.password_strength_bar.place(relx=0.03, rely=0.39, anchor="sw")
         self.password_strength_label.place(relx=0.03, rely=0.34, anchor="sw")
-        self.password_feedback.place(relx=0.03, rely=0.72, anchor="sw")
+        self.password_feedback.place(relx=0.03, rely=0.43, anchor="nw") #nw so it dosent change position with the height
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
@@ -197,8 +197,13 @@ class Password_checker:
         app.password_strength_bar.configure(progress_color=bar_colour)  # Change color based on score
         app.password_strength_bar.set(self.score / 100)  # Update the progress bar with the score as a percentage
 
-        app.password_feedback.configure(state="normal")  # Enable the textbox to update it 
+        app.password_feedback.configure(state="normal")  # Enable the textbox to update it
+        app.password_feedback.configure(fg_color="light grey")  # Set the background color of the feedback textbox
+        app.password_feedback.configure(height=len(self.password_issues) * 30)  # Adjust height based on number of issues
+        if len(self.password_issues) == 0:
+            app.password_feedback.configure(fg_color="transparent")
         app.password_feedback.delete("0.0", "end")  # Clear the textbox before inserting new issues
+
         for issue in self.password_issues:
             app.password_feedback.insert("end", issue + "\n")
             app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
