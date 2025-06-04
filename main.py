@@ -1,4 +1,4 @@
-#IDEAS(GUI): settings, help, about, customise for light/dark mode
+#IDEAS(GUI): settings, help, about(could display text at the start aswell as its blank) customise for light/dark mode
 
 #IDEAS(SECURITY): patterns such as aaaaa 1234 ect
 
@@ -53,7 +53,7 @@ class App(ctk.CTk):
         self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
         self.password_strength_bar.place(relx=0.03, rely=0.39, anchor="sw")
         self.password_strength_label.place(relx=0.03, rely=0.34, anchor="sw")
-        self.password_feedback.place(relx=0.03, rely=0.43, anchor="nw") #nw so it dosent change position with the height
+        self.password_feedback.place(relx=0.03, rely=0.43, anchor="nw") #nw so it dosent change position with the height if i have time will change them all to NW as this positioning makes more sense to me
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
@@ -70,7 +70,7 @@ class Password_checker:
         self.common = False
         self.score = 100
         self.password_issues = []
-        self.time_to_crack_seconds = 0
+        self.seconds_to_crack = 0
         self.load_common_passwords()
         self.load_dictionary_words()
 
@@ -93,7 +93,7 @@ class Password_checker:
 
                 self.dictionary_words = clean_words            
         except FileNotFoundError:
-            print("words_alpha.txt not found. dictionary password check will be disabled.")
+            print("words_alpha.txt not found. dictionary password check will be disabled.") # add this to ui later
         
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
@@ -176,12 +176,12 @@ class Password_checker:
             charset += 32 # special characters
         
         combinations = charset ** len(self.password)  # Calculate the total number of combinations
-        self.time_to_crack_seconds = combinations / 200000000000  # Assuming 200 billion guesses per second (fast end GPU cracking)
+        self.seconds_to_crack = combinations / 200000000000  # Assuming 200 billion guesses per second (fast end GPU cracking)
         kfactor = 1.0  # Adjust this factor based on the attacker's capabilities
-        if self.time_to_crack_seconds < 0.0001:
-            self.time_to_crack_seconds = "instantly"  # Round to 2 decimal places
+        if self.seconds_to_crack < 0.0001:
+            self.seconds_to_crack = "instantly"  # Round to 2 decimal places
         else:
-            self.time_to_crack_seconds = round(self.time_to_crack_seconds, 2)
+            self.seconds_to_crack = round(self.seconds_to_crack, 2)
                     
 
 
@@ -193,10 +193,8 @@ class Password_checker:
         self.check_for_dictionary_words()
         self.check_password_character_diversity()
         self.calculate_time_to_crack()
-        print(f"Time to crack: {(self.time_to_crack_seconds)} seconds")
-        if self.score < 0:
-            self.score = 0
-        
+        if self.score < 0: self.score = 0
+
         if self.score == 100:
             bar_colour = "green"
             app.password_strength_label.configure(text="Your password is incredibly strong.")
@@ -238,11 +236,39 @@ class Password_checker:
 
         #configure the time to crack label
         if not len(self.password_issues) == 0:
-            calculated_y = 0.44 + (len(self.password_issues*30))/HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
-        else: calculated_y = 0
-        if not type(self.time_to_crack_seconds) == str:
-            app.time_to_crack_label.configure(text=f"Your password will take: {self.time_to_crack_seconds} seconds to crack.")
-        else: app.time_to_crack_label.configure(text=f"Your password will be cracked {self.time_to_crack_seconds}.")
+            calculated_y = 0.45 + (len(self.password_issues*30))/HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
+        else: calculated_y = 0.45
+        
+        if not type(self.seconds_to_crack) == str:
+            seconds_to_crack = int(self.seconds_to_crack)
+            
+            years = seconds_to_crack // 31536000  # 365 days
+            remaining = seconds_to_crack % 31536000
+            months = remaining // 2592000  # 30 days
+            remaining = remaining % 2592000
+            days = remaining // 86400
+            remaining = remaining % 86400
+            hours = remaining // 3600
+            remaining = remaining % 3600
+            minutes = remaining // 60
+            seconds = remaining % 60
+
+            if years > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {years} years, {months} months, {days} days to crack.")
+            elif months > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {months} months, {days} days, {hours} hours to crack.")
+            elif days > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {days} days, {hours} hours, {minutes} minutes to crack.")
+            elif hours > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {hours} hours, {minutes} minutes, {seconds} seconds to crack.")
+            elif minutes > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {minutes} minutes, {seconds} seconds to crack.")
+            else:
+                app.time_to_crack_label.configure(text=f"Your password will take: {seconds} seconds to crack.")
+        
+        else:
+            app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.")
+
         app.time_to_crack_label.place(relx=0.03, rely=calculated_y, anchor="nw")
    
     def update_password(self):
