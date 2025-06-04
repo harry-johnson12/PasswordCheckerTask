@@ -40,6 +40,7 @@ class App(ctk.CTk):
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
         self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
+        self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="black")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
@@ -69,6 +70,7 @@ class Password_checker:
         self.common = False
         self.score = 100
         self.password_issues = []
+        self.time_to_crack_seconds = 0
         self.load_common_passwords()
         self.load_dictionary_words()
 
@@ -161,7 +163,28 @@ class Password_checker:
         if appending_issue != "Your password should contain a diverse range of characters. It is missing ":
             appending_issue = appending_issue[:-2] + "."
             self.password_issues.append(appending_issue)
+
+    def calculate_time_to_crack(self):
+        charset = 0
+        if any(character.islower() for character in self.password): 
+            charset += 26 # how many possible characters are in the password
+        if any(character.isupper() for character in self.password): 
+            charset += 26
+        if any(character.isdigit() for character in self.password): 
+            charset += 10
+        if any(not character.isalnum() for character in self.password): 
+            charset += 32 # special characters
         
+        combinations = charset ** len(self.password)  # Calculate the total number of combinations
+        self.time_to_crack_seconds = combinations / 200000000000  # Assuming 200 billion guesses per second (fast end GPU cracking)
+        kfactor = 1.0  # Adjust this factor based on the attacker's capabilities
+        if self.time_to_crack_seconds < 0.0001:
+            self.time_to_crack_seconds = "instantly"  # Round to 2 decimal places
+        else:
+            self.time_to_crack_seconds = round(self.time_to_crack_seconds, 2)
+                    
+
+
     def check_password_strength(self):
         self.password_issues = []
         self.breaches = self.password_breaches()
@@ -169,6 +192,8 @@ class Password_checker:
         self.length_penalty()
         self.check_for_dictionary_words()
         self.check_password_character_diversity()
+        self.calculate_time_to_crack()
+        print(f"Time to crack: {(self.time_to_crack_seconds)} seconds")
         if self.score < 0:
             self.score = 0
         
@@ -193,10 +218,12 @@ class Password_checker:
             bar_colour = "light grey"
             app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
 
+        #configure the password strength bar
         app.password_strength_bar.configure(fg_color="light grey")  # Set the background color of the progress bar
         app.password_strength_bar.configure(progress_color=bar_colour)  # Change color based on score
         app.password_strength_bar.set(self.score / 100)  # Update the progress bar with the score as a percentage
 
+        #configure the feedback text box
         app.password_feedback.configure(state="normal")  # Enable the textbox to update it
         app.password_feedback.configure(fg_color="light grey")  # Set the background color of the feedback textbox
         app.password_feedback.configure(height=len(self.password_issues) * 30)  # Adjust height based on number of issues
@@ -208,6 +235,15 @@ class Password_checker:
             app.password_feedback.insert("end", issue + "\n")
             app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
         app.password_feedback.configure(state="disabled")  # Disable the textbox after updating it
+
+        #configure the time to crack label
+        if not len(self.password_issues) == 0:
+            calculated_y = 0.44 + (len(self.password_issues*30))/HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
+        else: calculated_y = 0
+        if not type(self.time_to_crack_seconds) == str:
+            app.time_to_crack_label.configure(text=f"Your password will take: {self.time_to_crack_seconds} seconds to crack.")
+        else: app.time_to_crack_label.configure(text=f"Your password will be cracked {self.time_to_crack_seconds}.")
+        app.time_to_crack_label.place(relx=0.03, rely=calculated_y, anchor="nw")
    
     def update_password(self):
         if not app.password_entry.get() == "":
