@@ -17,6 +17,31 @@ FONT = "Helvetica Neue Medium"
 CORNER_RADIUS = 3
 PLACEHOLDER_TEXT_SIZE = 13
 
+class Menu(ctk.CTkToplevel):
+    def __init__(self):
+        super().__init__()
+        self.title("Menu")
+        self.geometry(f"{MENU_WIDTH}x{MENU_HEIGHT}")
+        self.resizable(False, False)
+        self._set_appearance_mode("light")
+        self.initialize_menu_widgets()
+        self.place_menu_widgets()
+
+    def initialize_menu_widgets(self):
+        self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
+        self.settings_button = ctk.CTkButton(self, text="Settings", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.help_button = ctk.CTkButton(self, text="Help", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.about_button = ctk.CTkButton(self, text="About", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.back_button = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+
+    def place_menu_widgets(self):
+        self.menu_title_lbl.place(relx=0.5, rely=0.12, anchor="n")
+        self.settings_button.place(relx=0.5, rely=0.27, anchor="n")
+        self.help_button.place(relx=0.5, rely=0.42, anchor="n")
+        self.about_button.place(relx=0.5, rely=0.57, anchor="n")
+        self.back_button.place(relx=0.5, rely=0.72, anchor="n")
+        
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
@@ -27,7 +52,6 @@ class App(ctk.CTk):
         self.resizable(False, False) 
         #self.iconbitmap("assets/icon.ico")
         self.initialize_main_widgets()
-        self.initialize_menu_widgets()
         self.place_main_widgets()
 
     def show_text(self):
@@ -38,25 +62,11 @@ class App(ctk.CTk):
             self.password_entry.configure(show="*")
             self.show_button.configure(text="Show")
         
-    def display_menu(self):
-        for widget in self.winfo_children():
-            widget.place_forget()
-            self.place_menu_widgets()
-            self.geometry(f"{MENU_WIDTH}x{MENU_HEIGHT}")
-    
-    def display_main_page(self):
-        for widget in self.winfo_children():
-            widget.place_forget()
-        self.initialize_main_widgets()
-        self.place_main_widgets()
-        self.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
-        self.password_checker.update_password()
-        
     def initialize_main_widgets(self):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
         self.show_button = ctk.CTkButton(self, text="Show", command=self.show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.menu_button = ctk.CTkButton(self, text="Menu", command=self.display_menu, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.menu_button = ctk.CTkButton(self, text="Menu", command=Menu, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
         self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
@@ -79,20 +89,6 @@ class App(ctk.CTk):
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
-    
-    def initialize_menu_widgets(self):
-        self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
-        self.settings_button = ctk.CTkButton(self, text="Settings", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.help_button = ctk.CTkButton(self, text="Help", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.about_button = ctk.CTkButton(self, text="About", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.back_button = ctk.CTkButton(self, text="Back", command=self.display_main_page, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-
-    def place_menu_widgets(self):
-        self.menu_title_lbl.place(relx=0.5, rely=0.12, anchor="n")
-        self.settings_button.place(relx=0.5, rely=0.27, anchor="n")
-        self.help_button.place(relx=0.5, rely=0.42, anchor="n")
-        self.about_button.place(relx=0.5, rely=0.57, anchor="n")
-        self.back_button.place(relx=0.5, rely=0.72, anchor="n")
 
 class Password_checker:
     def __init__(self):
