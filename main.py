@@ -1,4 +1,4 @@
-#IDEAS(GUI): settings, help, about(could display text at the start aswell as its blank) customise for light/dark mode
+#IDEAS(GUI): settings, help, about inside of the menu button - each opening a dif window (could display text at the start aswell as its blank) customise for light/dark mode
 
 #IDEAS(SECURITY): patterns such as aaaaa 1234 ect
 
@@ -9,8 +9,10 @@ import hashlib
 import requests
 import math
 
-WIDTH = 600
-HEIGHT = 400
+MAIN_WIDTH = 600
+MAIN_HEIGHT = 400
+MENU_WIDTH = 250
+MENU_HEIGHT = 300
 FONT = "Helvetica Neue Medium"
 CORNER_RADIUS = 3
 PLACEHOLDER_TEXT_SIZE = 13
@@ -20,37 +22,57 @@ class App(ctk.CTk):
         super().__init__()
         self.password_checker = password_checker
         self.title("PassPy")
-        self.geometry(f"{WIDTH}x{HEIGHT}")
+        self.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
         self._set_appearance_mode("light") # Modes: "system" (default), "dark", "light"
         self.resizable(False, False) 
         #self.iconbitmap("assets/icon.ico")
-            
-        def show_text():
-            if self.password_entry.cget("show") == "*":
-                self.password_entry.configure(show="")
-                self.show_button.configure(text="Hide")
-            else:
-                self.password_entry.configure(show="*")
-                self.show_button.configure(text="Show")
+        self.initialize_main_widgets()
+        self.initialize_menu_widgets()
+        self.place_main_widgets()
 
-        #instantiate the GUI elements
+    def show_text(self):
+        if self.password_entry.cget("show") == "*":
+            self.password_entry.configure(show="")
+            self.show_button.configure(text="Hide")
+        else:
+            self.password_entry.configure(show="*")
+            self.show_button.configure(text="Show")
+        
+    def display_menu(self):
+        for widget in self.winfo_children():
+            widget.place_forget()
+            self.place_menu_widgets()
+            self.geometry(f"{MENU_WIDTH}x{MENU_HEIGHT}")
+    
+    def display_main_page(self):
+        for widget in self.winfo_children():
+            widget.place_forget()
+        self.initialize_main_widgets()
+        self.place_main_widgets()
+        self.geometry(f"{MAIN_WIDTH}x{MAIN_HEIGHT}")
+        self.password_checker.update_password()
+        
+    def initialize_main_widgets(self):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
-        self.show_button = ctk.CTkButton(self, text="Show", command=show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.show_button = ctk.CTkButton(self, text="Show", command=self.show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.menu_button = ctk.CTkButton(self, text="Menu", command=self.display_menu, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
         self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
-        self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="black")
+        self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="black", fg_color="transparent")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
 
         self.password_strength_bar.set(0/100)  # Initialize the progress bar to 0
-
-        #place the GUI elements
-        self.password_entry.place(relx=0.29, rely=0.24, anchor="sw")
-        self.enter_button.place(relx=0.64, rely=0.24, anchor="sw")
-        self.show_button.place(relx=0.75, rely=0.24, anchor="sw")
+        self.password_entry.bind("<Return>", lambda event: password_checker.update_password()) 
+    
+    def place_main_widgets(self):
+        self.password_entry.place(relx=0.295, rely=0.24, anchor="sw")
+        self.enter_button.place(relx=0.65, rely=0.24, anchor="sw")
+        self.show_button.place(relx=0.76, rely=0.24, anchor="sw")
+        self.menu_button.place(relx=0.87, rely=0.24, anchor="sw")
         self.password_strength_bar.place(relx=0.03, rely=0.39, anchor="sw")
         self.password_strength_label.place(relx=0.03, rely=0.34, anchor="sw")
         self.password_feedback.place(relx=0.03, rely=0.43, anchor="nw") #nw so it dosent change position with the height if i have time will change them all to NW as this positioning makes more sense to me
@@ -58,7 +80,19 @@ class App(ctk.CTk):
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
     
-        self.password_entry.bind("<Return>", lambda event: password_checker.update_password())
+    def initialize_menu_widgets(self):
+        self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
+        self.settings_button = ctk.CTkButton(self, text="Settings", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.help_button = ctk.CTkButton(self, text="Help", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.about_button = ctk.CTkButton(self, text="About", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.back_button = ctk.CTkButton(self, text="Back", command=self.display_main_page, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+
+    def place_menu_widgets(self):
+        self.menu_title_lbl.place(relx=0.5, rely=0.12, anchor="n")
+        self.settings_button.place(relx=0.5, rely=0.27, anchor="n")
+        self.help_button.place(relx=0.5, rely=0.42, anchor="n")
+        self.about_button.place(relx=0.5, rely=0.57, anchor="n")
+        self.back_button.place(relx=0.5, rely=0.72, anchor="n")
 
 class Password_checker:
     def __init__(self):
@@ -183,8 +217,6 @@ class Password_checker:
         else:
             self.seconds_to_crack = round(self.seconds_to_crack, 2)
                     
-
-
     def check_password_strength(self):
         self.password_issues = []
         self.breaches = self.password_breaches()
@@ -194,6 +226,8 @@ class Password_checker:
         self.check_password_character_diversity()
         self.calculate_time_to_crack()
         if self.score < 0: self.score = 0
+
+        #UPDATING GUI 
 
         if self.score == 100:
             bar_colour = "green"
@@ -236,10 +270,10 @@ class Password_checker:
 
         #configure the time to crack label
         if not len(self.password_issues) == 0:
-            calculated_y = 0.45 + (len(self.password_issues*30))/HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
+            calculated_y = 0.45 + (len(self.password_issues*30))/MAIN_HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
         else: calculated_y = 0.45
         
-        if not type(self.seconds_to_crack) == str:
+        if not type(self.seconds_to_crack) == str: # if it takes time to crack, update the gui accordingly
             seconds_to_crack = int(self.seconds_to_crack)
             
             years = seconds_to_crack // 31536000  # 365 days
@@ -254,20 +288,20 @@ class Password_checker:
             seconds = remaining % 60
 
             if years > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {years} years, {months} months, {days} days to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {years} years, {months} months and {days} days to crack.")
             elif months > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {months} months, {days} days, {hours} hours to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {months} months, {days} days and {hours} hours to crack.")
             elif days > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {days} days, {hours} hours, {minutes} minutes to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {days} days, {hours} hours and {minutes} minutes to crack.")
             elif hours > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {hours} hours, {minutes} minutes, {seconds} seconds to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {hours} hours, {minutes} minutes and {seconds} seconds to crack.")
             elif minutes > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {minutes} minutes, {seconds} seconds to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {minutes} minutes and {seconds} seconds to crack.")
             else:
                 app.time_to_crack_label.configure(text=f"Your password will take: {seconds} seconds to crack.")
         
         else:
-            app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.")
+            app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.") # instantly instance
 
         app.time_to_crack_label.place(relx=0.03, rely=calculated_y, anchor="nw")
    
