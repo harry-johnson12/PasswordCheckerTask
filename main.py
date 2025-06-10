@@ -1,9 +1,10 @@
-#IDEAS(GUI): settings, help, about inside of the menu button - each opening a dif window (could display text at the start aswell as its blank) customise for light/dark mode
+#IDEAS(GUI): settings (could display text at the start aswell as its blank) customise for light/dark mode
 
 #IDEAS(SECURITY): patterns such as aaaaa 1234 ect
 
 #OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make the window resizable
 
+# settings: change the font, size, colour, background colour, corner radius, placeholder text size, progress bar colour, text box colour, text box height, text box width, text box font size, text box corner radius
 import customtkinter as ctk
 import hashlib
 import requests
@@ -16,8 +17,8 @@ MENU_HEIGHT = 300
 OTHER_WIDTH = 350
 OTHER_HEIGHT = 300
 
-FONT = "Helvetica Neue Medium"
-CORNER_RADIUS = 3
+FONT = "Avenir Next Medium"
+CORNER_RADIUS = 4
 PLACEHOLDER_TEXT_SIZE = 13
 
 class Menu(ctk.CTkToplevel):
@@ -55,14 +56,13 @@ class Menu(ctk.CTkToplevel):
 
     def initialize_menu_widgets(self):
         self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
-        self.settings_button = ctk.CTkButton(self, text="Settings", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.help_button = ctk.CTkButton(self, text="Help", command=self.show_help, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.about_button = ctk.CTkButton(self, text="About", command=self.show_about, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_to_menubutton = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
         self.help_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
-        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, however this is not the greatest measure to test security, hence why it is below the feedback feild. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
+        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
         self.help_text.configure(state="disabled")
         
         self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
@@ -70,13 +70,10 @@ class Menu(ctk.CTkToplevel):
         self.about_text.configure(state="disabled")
 
     def place_menu_widgets(self):
-        self.menu_title_lbl.place(relx=0.5, rely=0.12, anchor="n")
-        self.settings_button.place(relx=0.5, rely=0.27, anchor="n")
-        self.help_button.place(relx=0.5, rely=0.42, anchor="n")
-        self.about_button.place(relx=0.5, rely=0.57, anchor="n")
-        self.back_to_menubutton.place(relx=0.5, rely=0.72, anchor="n")
-
-        
+        self.menu_title_lbl.place(relx=0.5, rely=0.10, anchor="n")
+        self.help_button.place(relx=0.5, rely=0.28, anchor="n")
+        self.about_button.place(relx=0.5, rely=0.44, anchor="n")
+        self.back_to_menubutton.place(relx=0.5, rely=0.59, anchor="n")
 
 class App(ctk.CTk):
     def __init__(self):
@@ -103,6 +100,7 @@ class App(ctk.CTk):
         self.show_button = ctk.CTkButton(self, text="Show", command=self.show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.enter_button = ctk.CTkButton(self, text="Enter", command=password_checker.update_password, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.menu_button = ctk.CTkButton(self, text="Menu", command=Menu, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.welcome_text = ctk.CTkTextbox(self, width=550, height=200, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="normal", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
         self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
@@ -112,9 +110,12 @@ class App(ctk.CTk):
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
 
         self.password_strength_bar.set(0/100)  # Initialize the progress bar to 0
-        self.password_entry.bind("<Return>", lambda event: password_checker.update_password()) 
+        self.password_entry.bind("<Return>", lambda event: password_checker.update_password())
+        self.welcome_text.insert("0.0", "PassPy is a password strength checker that will help you create a strong password. \n\nTo get started, enter your password in the input field and click 'Enter'. The application will analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nFor more information, visit the help or about sections via the menu or GitHub repository (link in the menu -> about) or open an issue if you have any questions or suggestions.")
+        self.welcome_text.configure(state="disabled")
     
     def place_main_widgets(self):
+        self.welcome_text.place(relx=0.03, rely=0.8, anchor="sw")
         self.password_entry.place(relx=0.295, rely=0.24, anchor="sw")
         self.enter_button.place(relx=0.65, rely=0.24, anchor="sw")
         self.show_button.place(relx=0.76, rely=0.24, anchor="sw")
@@ -125,6 +126,9 @@ class App(ctk.CTk):
         self.title_lbl.place(relx=0.03, rely=0.12, anchor="sw")
         self.enter_pass_lbl.place(relx=0.03, rely=0.24, anchor="sw")
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
+
+        self.welcome_text.lift()
+
 
 class Password_checker:
     def __init__(self):
@@ -303,12 +307,13 @@ class Password_checker:
         #configure the time to crack label
         if not len(self.password_issues) == 0:
             calculated_y = 0.45 + (len(self.password_issues*30))/MAIN_HEIGHT # The initial height down of the feedback box + the decimal of the screen it covers after its hegiht is updated
-        else: calculated_y = 0.45
+        else: calculated_y = 0.41
         
         if not type(self.seconds_to_crack) == str: # if it takes time to crack, update the gui accordingly
             seconds_to_crack = int(self.seconds_to_crack)
             
             years = seconds_to_crack // 31536000  # 365 days
+
             remaining = seconds_to_crack % 31536000
             months = remaining // 2592000  # 30 days
             remaining = remaining % 2592000
@@ -331,11 +336,16 @@ class Password_checker:
                 app.time_to_crack_label.configure(text=f"Your password will take: {minutes} minutes and {seconds} seconds to crack.")
             else:
                 app.time_to_crack_label.configure(text=f"Your password will take: {seconds} seconds to crack.")
-        
+            
+            if years > 1 * 10**15:
+                app.time_to_crack_label.configure(text="Your password will take over 1 quadrillion years to crack")
+            
         else:
             app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.") # instantly instance
 
         app.time_to_crack_label.place(relx=0.03, rely=calculated_y, anchor="nw")
+
+        app.welcome_text.place_forget()  # Hide the welcome text after the first password is entered
    
     def update_password(self):
         if not app.password_entry.get() == "":
