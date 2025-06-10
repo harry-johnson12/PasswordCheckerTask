@@ -95,6 +95,15 @@ class App(ctk.CTk):
             self.password_entry.configure(show="*")
             self.show_button.configure(text="Show")
         
+    def toggle_text(self):
+        if password_checker.toggled_text == password_checker.astrixed_password:
+            password_checker.toggled_text = password_checker.password
+            self.previous_password_lbl.configure(text=f"Password entered: {password_checker.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+
+        else:
+            password_checker.toggled_text = password_checker.astrixed_password
+            self.previous_password_lbl.configure(text=f"Password entered: {password_checker.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+            
     def initialize_main_widgets(self):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
         self.show_button = ctk.CTkButton(self, text="Show", command=self.show_text, font=(FONT, 12), width=60, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
@@ -105,12 +114,14 @@ class App(ctk.CTk):
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
         self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
         self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="black", fg_color="transparent")
+        self.previous_password_lbl = ctk.CTkLabel(self, text="Password entered: ", font=(FONT, 13), text_color="black")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
 
         self.password_strength_bar.set(0/100)  # Initialize the progress bar to 0
-        self.password_entry.bind("<Return>", lambda event: password_checker.update_password())
+        self.bind("<Return>", lambda event: password_checker.update_password())
+        self.bind("<Tab>", lambda event: (self.toggle_text(), "break"))  # Toggle password visibility with Tab key
         self.welcome_text.insert("0.0", "PassPy is a password strength checker that will help you create a strong password. \n\nTo get started, enter your password in the input field and click 'Enter'. The application will analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nFor more information, visit the help or about sections via the menu or GitHub repository (link in the menu -> about) or open an issue if you have any questions or suggestions.")
         self.welcome_text.configure(state="disabled")
     
@@ -345,6 +356,18 @@ class Password_checker:
 
         app.time_to_crack_label.place(relx=0.03, rely=calculated_y, anchor="nw")
 
+        #configure the previous password label
+        self.astrixed_password = ""
+        for i in range(len(self.password)): 
+            self.astrixed_password += "*"
+
+        self.toggled_text = self.astrixed_password
+        app.previous_password_lbl.configure(text=f"Password entered: {self.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+        
+        calculated_y += 0.07  # Increment the y position for the next label
+        app.previous_password_lbl.place(relx=0.03, rely=calculated_y, anchor="nw")
+        
+        #hide the welcome text
         app.welcome_text.place_forget()  # Hide the welcome text after the first password is entered
    
     def update_password(self):
@@ -357,6 +380,7 @@ class Password_checker:
             app.password_entry.configure(show="*")
             app.show_button.configure(text="Show")
             self.check_password_strength()
+            app.focus_set()
         else:
             print("Please enter a password. Add this to the UI later")
 
