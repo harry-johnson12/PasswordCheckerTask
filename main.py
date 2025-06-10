@@ -13,6 +13,9 @@ MAIN_WIDTH = 600
 MAIN_HEIGHT = 400
 MENU_WIDTH = 250
 MENU_HEIGHT = 300
+OTHER_WIDTH = 350
+OTHER_HEIGHT = 300
+
 FONT = "Helvetica Neue Medium"
 CORNER_RADIUS = 3
 PLACEHOLDER_TEXT_SIZE = 13
@@ -26,20 +29,53 @@ class Menu(ctk.CTkToplevel):
         self._set_appearance_mode("light")
         self.initialize_menu_widgets()
         self.place_menu_widgets()
+    
+    def show_menu(self):
+        for widget in self.winfo_children():
+            widget.place_forget()
+        self.title("Menu")
+        self.geometry(f"{MENU_WIDTH}x{MENU_HEIGHT}")
+        self.place_menu_widgets()
+    
+    def show_help(self):
+        for widget in self.winfo_children():
+            widget.place_forget()
+        self.title("Help")
+        self.geometry(f"{OTHER_WIDTH}x{OTHER_HEIGHT}")
+        self.help_text.place(relx=0.5, rely=0.06, anchor="n")
+        self.back_button.place(relx=0.5, rely=0.85, anchor="n")
+    
+    def show_about(self):
+        for widget in self.winfo_children():
+            widget.place_forget()
+        self.title("About PassPy")
+        self.geometry(f"{OTHER_WIDTH}x{OTHER_HEIGHT}")
+        self.about_text.place(relx=0.5, rely=0.06, anchor="n")
+        self.back_button.place(relx=0.5, rely=0.85, anchor="n")
 
     def initialize_menu_widgets(self):
         self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
         self.settings_button = ctk.CTkButton(self, text="Settings", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.help_button = ctk.CTkButton(self, text="Help", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.about_button = ctk.CTkButton(self, text="About", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.back_button = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.help_button = ctk.CTkButton(self, text="Help", command=self.show_help, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.about_button = ctk.CTkButton(self, text="About", command=self.show_about, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.back_to_menubutton = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        
+        self.help_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
+        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, however this is not the greatest measure to test security, hence why it is below the feedback feild. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
+        self.help_text.configure(state="disabled")
+        
+        self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
+        self.about_text.insert("0.0", "PassPy is a password strength checker created by Harry Johnson for a year 11 software engineering task. It uses a range of tests including checking your password against common passwords, dictionary words, data breaches in combination with length and character tests to help you create a strong password. \n\nFor more information, visit the GitHub repository:\nhttps://github.com/harry-johnson12/Password-Checker-Task/tree/main\n\nIf you have any questions or suggestions, feel free to open an issue on the GitHub repository.\n\nThank you for using PassPy!")
+        self.about_text.configure(state="disabled")
 
     def place_menu_widgets(self):
         self.menu_title_lbl.place(relx=0.5, rely=0.12, anchor="n")
         self.settings_button.place(relx=0.5, rely=0.27, anchor="n")
         self.help_button.place(relx=0.5, rely=0.42, anchor="n")
         self.about_button.place(relx=0.5, rely=0.57, anchor="n")
-        self.back_button.place(relx=0.5, rely=0.72, anchor="n")
+        self.back_to_menubutton.place(relx=0.5, rely=0.72, anchor="n")
+
         
 
 class App(ctk.CTk):
