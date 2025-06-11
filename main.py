@@ -98,11 +98,11 @@ class App(ctk.CTk):
     def toggle_text(self):
         if password_checker.toggled_text == password_checker.astrixed_password:
             password_checker.toggled_text = password_checker.password
-            self.previous_password_lbl.configure(text=f"Password entered: {password_checker.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+            self.previous_password_lbl.configure(text=f"Password entered (TAB to view):  {password_checker.toggled_text}")  # Update the previous password label
 
         else:
             password_checker.toggled_text = password_checker.astrixed_password
-            self.previous_password_lbl.configure(text=f"Password entered: {password_checker.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+            self.previous_password_lbl.configure(text=f"Password entered (TAB to view):  {password_checker.toggled_text}")  # Update the previous password label
             
     def initialize_main_widgets(self):
         self.password_entry = ctk.CTkEntry(self, corner_radius=CORNER_RADIUS, placeholder_text="Password", width=200, show="*", font=(FONT, PLACEHOLDER_TEXT_SIZE))
@@ -349,7 +349,7 @@ class Password_checker:
                 app.time_to_crack_label.configure(text=f"Your password will take: {seconds} seconds to crack.")
             
             if years > 1 * 10**15:
-                app.time_to_crack_label.configure(text="Your password will take over 1 quadrillion years to crack")
+                app.time_to_crack_label.configure(text="Your password will take over one quadrillion years to crack")
             
         else:
             app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.") # instantly instance
@@ -362,7 +362,7 @@ class Password_checker:
             self.astrixed_password += "*"
 
         self.toggled_text = self.astrixed_password
-        app.previous_password_lbl.configure(text=f"Password entered: {self.toggled_text}  Use TAB to toggle view")  # Update the previous password label
+        app.previous_password_lbl.configure(text=f"Password entered (TAB to view):  {password_checker.toggled_text}")  # Update the previous password label
         
         calculated_y += 0.07  # Increment the y position for the next label
         app.previous_password_lbl.place(relx=0.03, rely=calculated_y, anchor="nw")
