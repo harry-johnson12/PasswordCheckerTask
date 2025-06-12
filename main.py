@@ -68,6 +68,7 @@ class Menu(ctk.CTkToplevel):
         self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
         self.help_button = ctk.CTkButton(self, text="Help", command=self.show_help, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.about_button = ctk.CTkButton(self, text="About", command=self.show_about, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.passkey_generator_button = ctk.CTkButton(self, text="Passkey Generator", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_to_menubutton = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
@@ -89,7 +90,8 @@ class Menu(ctk.CTkToplevel):
         self.menu_title_lbl.place(relx=0.5, rely=0.10, anchor="n")
         self.help_button.place(relx=0.5, rely=0.28, anchor="n")
         self.about_button.place(relx=0.5, rely=0.44, anchor="n")
-        self.back_to_menubutton.place(relx=0.5, rely=0.59, anchor="n")
+        self.passkey_generator_button.place(relx=0.5, rely=0.59, anchor="n")
+        self.back_to_menubutton.place(relx=0.5, rely=0.74, anchor="n")
 
 class App(ctk.CTk):
     def __init__(self):
@@ -395,10 +397,11 @@ class Password_checker:
             app.password_entry.configure(show="*")
             app.show_button.configure(text="Show")
             self.check_password_strength()
+            app.password_entry.configure(placeholder_text="Password")
             app.focus_set()
         else:
-            print("Please enter a password. Add this to the UI later")
-
+            app.password_entry.configure(placeholder_text="Please enter a password")  # Change the placeholder text to red if no password is entered
+            app.focus_set()
 password_checker = Password_checker()
 app = App()
 app.mainloop()
