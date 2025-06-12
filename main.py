@@ -9,6 +9,7 @@ import customtkinter as ctk
 import hashlib
 import requests
 import math
+import webbrowser
 
 MAIN_WIDTH = 600
 MAIN_HEIGHT = 400
@@ -53,6 +54,15 @@ class Menu(ctk.CTkToplevel):
         self.geometry(f"{OTHER_WIDTH}x{OTHER_HEIGHT}")
         self.about_text.place(relx=0.5, rely=0.06, anchor="n")
         self.back_button.place(relx=0.5, rely=0.85, anchor="n")
+    
+    def create_links(self, widget, url):
+        widget.configure(state="normal")
+        start = widget.search(url, "1.0", stopindex="end")
+        end = f"{start}+{len(url)}c"
+        widget.tag_add("link", start, end)
+        widget.tag_config("link", foreground="blue", underline=True)
+        widget.tag_bind("link", "<Button-1>", lambda e: webbrowser.open(url))
+        widget.configure(state="disabled")
 
     def initialize_menu_widgets(self):
         self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
@@ -68,6 +78,12 @@ class Menu(ctk.CTkToplevel):
         self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
         self.about_text.insert("0.0", "PassPy is a password strength checker created by Harry Johnson for a year 11 software engineering task. It uses a range of tests including checking your password against common passwords, dictionary words, data breaches in combination with length and character tests to help you create a strong password. \n\nFor more information, visit the GitHub repository:\nhttps://github.com/harry-johnson12/Password-Checker-Task/tree/main\n\nIf you have any questions or suggestions, feel free to open an issue on the GitHub repository.\n\nThank you for using PassPy!")
         self.about_text.configure(state="disabled")
+
+        link = "https://github.com/harry-johnson12/Password-Checker-Task/tree/main"
+        self.create_links(self.about_text, link)
+
+        link = "https://haveibeenpwned.com/Passwords"
+        self.create_links(self.help_text, link)
 
     def place_menu_widgets(self):
         self.menu_title_lbl.place(relx=0.5, rely=0.10, anchor="n")
@@ -139,7 +155,6 @@ class App(ctk.CTk):
         self.credit_lbl.place(relx=0.2, rely=0.14, anchor="sw")
 
         self.welcome_text.lift()
-
 
 class Password_checker:
     def __init__(self):
