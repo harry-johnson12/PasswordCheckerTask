@@ -67,6 +67,10 @@ class Menu(ctk.CTkToplevel):
         self.characters = []
         self.generated_password = ""
         dispersion = random.randint(0, 3)  # Randomly decide the type of character to add
+        # Define excluded special character ASCII codes not allowed in passwords
+        excluded_codes = {32, 34, 38, 39, 42, 47, 58, 59, 60, 62, 63, 92, 96, 124}
+        special_chars = [chr(i) for i in range(33, 127)
+            if not chr(i).isalnum() and i not in excluded_codes]
 
         #decide the amount of each type of character to add based on the dispersion
         if dispersion == 0:
@@ -101,7 +105,7 @@ class Menu(ctk.CTkToplevel):
         for i in range(self.digits):
             self.characters.append(chr(random.randint(48, 57)))
         for i in range(self.special_characters):
-            self.characters.append(chr(random.randint(33, 47)))
+            self.characters.append(random.choice(special_chars))  # Randomly select a special character from the list
         
         # Shuffle the characters to create a random password
         random.shuffle(self.characters)
@@ -120,7 +124,7 @@ class Menu(ctk.CTkToplevel):
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
         self.help_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
-        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild. There is also a button in the menu which will generate and copy a secure password to your clipboard which you can then test and use. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
+        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild.\n\nThere is also a button in the menu which will generate and copy a secure password to your clipboard which you can then test and use.\n\nFor more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
         self.help_text.configure(state="disabled")
         
         self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
