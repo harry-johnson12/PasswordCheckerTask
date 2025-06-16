@@ -120,7 +120,7 @@ class Menu(ctk.CTkToplevel):
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
         self.help_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
-        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
+        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild. There is also a button in the menu which will generate and copy a secure password to your clipboard which you can then test and use. For more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
         self.help_text.configure(state="disabled")
         
         self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
@@ -131,6 +131,7 @@ class Menu(ctk.CTkToplevel):
         self.create_links(self.about_text, link)
 
         link = "https://haveibeenpwned.com/Passwords"
+        
         self.create_links(self.help_text, link)
 
     def place_menu_widgets(self):
@@ -241,7 +242,7 @@ class Password_checker:
                 self.dictionary_words = clean_words            
         except FileNotFoundError:
             self.common_passwords_issue = True
-                    
+
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
         password_hash_prefix, password_hash_suffix = hash[:5], hash[5:] # Split the hash into prefix and suffix
@@ -459,6 +460,7 @@ class Password_checker:
         else:
             app.password_entry.configure(placeholder_text="Please enter a password")  # Change the placeholder text to red if no password is entered
             app.focus_set()
+
 password_checker = Password_checker()
 app = App()
 app.mainloop()
