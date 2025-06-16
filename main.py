@@ -1,14 +1,13 @@
-#IDEAS(GUI): settings (could display text at the start aswell as its blank) customise for light/dark mode
+#IDEAS(GUI): settings - customise for light/dark mode, size parameter could fix the cut off text issue, eventually make the window resizable
 
-#IDEAS(SECURITY): patterns such as aaaaa 1234 ect
+#OTHER: also have a password generator, password manager, potentially AI password improver,
 
-#OTHER: also have a password generator, password manager, potentially AI password improver, size parameter could fix the cut off text issue, eventually make the window resizable
-
-# settings: change the font, size, colour, background colour, corner radius, placeholder text size, progress bar colour, text box colour, text box height, text box width, text box font size, text box corner radius
 import customtkinter as ctk
 import hashlib
 import requests
 import math
+import random
+import pyperclip
 import webbrowser
 
 MAIN_WIDTH = 600
@@ -64,11 +63,59 @@ class Menu(ctk.CTkToplevel):
         widget.tag_bind("link", "<Button-1>", lambda e: webbrowser.open(url))
         widget.configure(state="disabled")
 
+    def generate_password(self):
+        self.characters = []
+        self.generated_password = ""
+        dispersion = random.randint(0, 3)  # Randomly decide the type of character to add
+
+        #decide the amount of each type of character to add based on the dispersion
+        if dispersion == 0:
+                self.lower_case = 4
+                self.uppercase = 4
+                self.digits = 4
+                self.special_characters = 5
+        elif dispersion == 1:
+                self.lower_case = 4
+                self.uppercase = 4
+                self.digits = 5
+                self.special_characters = 4
+        elif dispersion == 2:
+                self.lower_case = 4
+                self.uppercase = 5
+                self.digits = 4
+                self.special_characters = 4
+        elif dispersion == 3:
+                self.lower_case = 5
+                self.uppercase = 4
+                self.digits = 4
+                self.special_characters = 4
+            #first decide the characters in the password, equal amount of each 
+
+                self.generated_password += chr(random.randint(33, 126))  # Generate a random password with characters from ASCII range 33 to 126
+
+        # Generate random characters for each type
+        for i in range(self.lower_case):
+            self.characters.append(chr(random.randint(97, 122)))
+        for i in range(self.uppercase):
+            self.characters.append(chr(random.randint(65, 90)))
+        for i in range(self.digits):
+            self.characters.append(chr(random.randint(48, 57)))
+        for i in range(self.special_characters):
+            self.characters.append(chr(random.randint(33, 47)))
+        
+        # Shuffle the characters to create a random password
+        random.shuffle(self.characters)
+        self.generated_password = "".join(self.characters)  # Join the characters to form the password
+        pyperclip.copy(self.generated_password)  # Copy the generated password to the clipboard
+    
+        self.password_generator_button.configure(text="Copied to clipboard!")
+        self.after(2000, lambda: self.password_generator_button.configure(text="Generate Password"))
+
     def initialize_menu_widgets(self):
         self.menu_title_lbl = ctk.CTkLabel(self, text="Menu", font=(FONT, 25), text_color="black")
         self.help_button = ctk.CTkButton(self, text="Help", command=self.show_help, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.about_button = ctk.CTkButton(self, text="About", command=self.show_about, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
-        self.passkey_generator_button = ctk.CTkButton(self, text="Passkey Generator", font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
+        self.password_generator_button = ctk.CTkButton(self, text="Generate password", command=self.generate_password, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_to_menubutton = ctk.CTkButton(self, text="Back", command=self.destroy, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
@@ -90,7 +137,7 @@ class Menu(ctk.CTkToplevel):
         self.menu_title_lbl.place(relx=0.5, rely=0.10, anchor="n")
         self.help_button.place(relx=0.5, rely=0.28, anchor="n")
         self.about_button.place(relx=0.5, rely=0.44, anchor="n")
-        self.passkey_generator_button.place(relx=0.5, rely=0.59, anchor="n")
+        self.password_generator_button.place(relx=0.5, rely=0.59, anchor="n")
         self.back_to_menubutton.place(relx=0.5, rely=0.74, anchor="n")
 
 class App(ctk.CTk):
@@ -161,6 +208,8 @@ class App(ctk.CTk):
 class Password_checker:
     def __init__(self):
         self.password = ""
+        self.rock_you_issue = False
+        self.common_passwords_issue = False
         self.saved_password = self.password
         self.password_length = len(self.password)
         self.password_strength = "Weak"
@@ -168,7 +217,7 @@ class Password_checker:
         self.common = False
         self.score = 100
         self.password_issues = []
-        self.seconds_to_crack = 0
+        self.Seconds_to_crack = 0
         self.load_common_passwords()
         self.load_dictionary_words()
 
@@ -177,7 +226,7 @@ class Password_checker:
             with open(path, "r", encoding="utf-8", errors="ignore") as rockyou_file:
                 self.common_passwords = set(line.strip() for line in rockyou_file)
         except FileNotFoundError:
-            print("rockyou.txt not found. Common password check will be disabled.")
+            self.rock_you_issue = True
 
     def load_dictionary_words(self, path="10,000_common_words.txt"):
         try:
@@ -191,8 +240,8 @@ class Password_checker:
 
                 self.dictionary_words = clean_words            
         except FileNotFoundError:
-            print("words_alpha.txt not found. dictionary password check will be disabled.") # add this to ui later
-        
+            self.common_passwords_issue = True
+                    
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
         password_hash_prefix, password_hash_suffix = hash[:5], hash[5:] # Split the hash into prefix and suffix
@@ -224,6 +273,7 @@ class Password_checker:
                 if word == self.password.lower():
                     self.password_issues.append(f"Your password is the just the word '{word}', which is not secure.")
                     self.score -= 80
+                    break
                 else: 
                     self.word_count += 1
                     containing_words.append(word)
@@ -274,32 +324,23 @@ class Password_checker:
             charset += 32 # special characters
         
         combinations = charset ** len(self.password)  # Calculate the total number of combinations
-        self.seconds_to_crack = combinations / 200000000000  # Assuming 200 billion guesses per second (fast end GPU cracking)
-        kfactor = 1.0  # Adjust this factor based on the attacker's capabilities
-        if self.seconds_to_crack < 0.0001:
+        try:
+            self.seconds_to_crack = combinations / 200000000000  # Assuming 200 billion guesses per second (fast end GPU cracking)
+        except:
+            self.seconds_to_crack = 1 * 10**15
+
+        if self.seconds_to_crack < 1:
             self.seconds_to_crack = "instantly"  # Round to 2 decimal places
         else:
             self.seconds_to_crack = round(self.seconds_to_crack, 2)
                     
-    def check_password_strength(self):
-        self.password_issues = []
-        self.breaches = self.password_breaches()
-        self.common = self.check_common_passwords()
-        self.length_penalty()
-        self.check_for_dictionary_words()
-        self.check_password_character_diversity()
-        self.calculate_time_to_crack()
-        if self.score < 0: self.score = 0
-
-        #UPDATING GUI 
-
-        if self.score == 100:
-            bar_colour = "green"
-            app.password_strength_label.configure(text="Your password is incredibly strong.")
-        if self.score >= 90:
-            app.password_strength_label.configure(text="Your password section is very strong, to maximise security, view the below recomendations.")
-        if self.score >= 80:
-            bar_colour = "light green"
+    def update_gui(self):
+        bar_colour = "light green"
+        if self.score >= 95:
+            app.password_strength_label.configure(text="Your password is incredibly strong!")
+        elif self.score >= 90:
+            app.password_strength_label.configure(text="Your password section is very strong, view the below recomendations.")
+        elif self.score >= 80:
             app.password_strength_label.configure(text="Your password is strong, to maximise security, view the below recomendations.")
         elif self.score >= 50: 
             bar_colour = "yellow"
@@ -310,6 +351,7 @@ class Password_checker:
         elif self.score > 0:
             bar_colour = "red"
             app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
+
         else:
             bar_colour = "light grey"
             app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
@@ -323,10 +365,14 @@ class Password_checker:
         app.password_feedback.configure(state="normal")  # Enable the textbox to update it
         app.password_feedback.configure(fg_color="light grey")  # Set the background color of the feedback textbox
         app.password_feedback.configure(height=len(self.password_issues) * 30)  # Adjust height based on number of issues
-        if len(self.password_issues) == 0:
+        if len(self.password_issues) == 0 and not self.rock_you_issue and not self.common_passwords_issue:
             app.password_feedback.configure(fg_color="transparent")
         app.password_feedback.delete("0.0", "end")  # Clear the textbox before inserting new issues
 
+        if self.rock_you_issue:
+            app.password_feedback.insert("end", "There was an error loading the common passwords file, the common password check will be disabled.\n")
+        if self.common_passwords_issue:
+            app.password_feedback.insert("end", "There was an error loading the dictionary words file, the dictionary password check will be disabled.\n")
         for issue in self.password_issues:
             app.password_feedback.insert("end", issue + "\n")
             app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
@@ -338,35 +384,35 @@ class Password_checker:
         else: calculated_y = 0.41
         
         if not type(self.seconds_to_crack) == str: # if it takes time to crack, update the gui accordingly
-            seconds_to_crack = int(self.seconds_to_crack)
+            Seconds_to_crack = int(self.seconds_to_crack)
             
-            years = seconds_to_crack // 31536000  # 365 days
+            Years = Seconds_to_crack // 31536000  # 365 Days
 
-            remaining = seconds_to_crack % 31536000
-            months = remaining // 2592000  # 30 days
+            remaining = Seconds_to_crack % 31536000
+            Months = remaining // 2592000  # 30 Days
             remaining = remaining % 2592000
-            days = remaining // 86400
+            Days = remaining // 86400
             remaining = remaining % 86400
-            hours = remaining // 3600
+            Hours = remaining // 3600
             remaining = remaining % 3600
-            minutes = remaining // 60
-            seconds = remaining % 60
+            Minutes = remaining // 60
+            Seconds = remaining % 60
 
-            if years > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {years} years, {months} months and {days} days to crack.")
-            elif months > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {months} months, {days} days and {hours} hours to crack.")
-            elif days > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {days} days, {hours} hours and {minutes} minutes to crack.")
-            elif hours > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {hours} hours, {minutes} minutes and {seconds} seconds to crack.")
-            elif minutes > 0:
-                app.time_to_crack_label.configure(text=f"Your password will take: {minutes} minutes and {seconds} seconds to crack.")
+            if Years > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {Years} Years, {Months} Months and {Days} Days to crack.")
+            elif Months > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {Months} Months, {Days} Days and {Hours} Hours to crack.")
+            elif Days > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {Days} Days, {Hours} Hours and {Minutes} Minutes to crack.")
+            elif Hours > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {Hours} Hours, {Minutes} Minutes and {Seconds} Seconds to crack.")
+            elif Minutes > 0:
+                app.time_to_crack_label.configure(text=f"Your password will take: {Minutes} Minutes and {Seconds} Seconds to crack.")
             else:
-                app.time_to_crack_label.configure(text=f"Your password will take: {seconds} seconds to crack.")
+                app.time_to_crack_label.configure(text=f"Your password will take: {Seconds} Seconds to crack.")
             
-            if years > 1 * 10**15:
-                app.time_to_crack_label.configure(text="Your password will take over one quadrillion years to crack")
+            if Years > 1 * 10**15:
+                app.time_to_crack_label.configure(text="Your password will take over one quadrillion Years to crack")
             
         else:
             app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.") # instantly instance
@@ -376,7 +422,7 @@ class Password_checker:
         #configure the previous password label
         self.astrixed_password = ""
         for i in range(len(self.password)): 
-            self.astrixed_password += "*"
+            self.astrixed_password += "•"
 
         self.toggled_text = self.astrixed_password
         app.previous_password_lbl.configure(text=f"Password entered (TAB to view):  {password_checker.toggled_text}")  # Update the previous password label
@@ -387,6 +433,17 @@ class Password_checker:
         #hide the welcome text
         app.welcome_text.place_forget()  # Hide the welcome text after the first password is entered
    
+    def check_password_strength(self):
+        self.password_issues = []
+        self.breaches = self.password_breaches()
+        self.common = self.check_common_passwords()
+        self.length_penalty()
+        self.check_for_dictionary_words()
+        self.check_password_character_diversity()
+        self.calculate_time_to_crack()
+        if self.score < 0: self.score = 0
+        self.update_gui()  # Update the GUI with the new password strength and issues
+
     def update_password(self):
         if not app.password_entry.get() == "":
             self.saved_password = self.password  # Save the previous password
