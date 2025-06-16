@@ -182,9 +182,9 @@ class App(ctk.CTk):
         self.welcome_text = ctk.CTkTextbox(self, width=550, height=200, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="normal", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
         self.password_strength_bar = ctk.CTkProgressBar(self, width=492, height=10, corner_radius=CORNER_RADIUS, mode="determinate", fg_color="", progress_color="", orientation="horizontal")
         self.password_strength_label = ctk.CTkLabel(self, text="", font=(FONT, 14), text_color="black")
-        self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="dark grey", scrollbar_button_color="light grey", wrap="word")
-        self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="black", fg_color="transparent")
-        self.previous_password_lbl = ctk.CTkLabel(self, text="Password entered: ", font=(FONT, 13), text_color="black")
+        self.password_feedback = ctk.CTkTextbox(self, width=550, height=120, corner_radius=CORNER_RADIUS, font=(FONT, 12), state="disabled", fg_color="transparent", text_color="black", scrollbar_button_color="light grey", wrap="word")
+        self.time_to_crack_label = ctk.CTkLabel(self, text="", font=(FONT, 13), text_color="dark grey", fg_color="transparent")
+        self.previous_password_lbl = ctk.CTkLabel(self, text="Password entered: ", font=(FONT, 13), text_color="dark grey")
         self.title_lbl = ctk.CTkLabel(self, text="PassPy", font=(FONT, 28), text_color="black")
         self.enter_pass_lbl = ctk.CTkLabel(self, text="Enter Password", font=(FONT, 20), text_color="black")
         self.credit_lbl = ctk.CTkLabel(self, text="A password strength checker by Harry Johnson.", font=(FONT, 12), text_color="dark grey")
@@ -346,10 +346,10 @@ class Password_checker:
         elif self.score >= 90:
             app.password_strength_label.configure(text="Your password section is very strong, view the below recomendations.")
         elif self.score >= 80:
-            app.password_strength_label.configure(text="Your password is strong, to maximise security, view the below recomendations.")
+            app.password_strength_label.configure(text="Your password is strong, to maximise security, view the issues below.")
         elif self.score >= 50: 
             bar_colour = "yellow"
-            app.password_strength_label.configure(text="Your password is average strength, view the issues below to improve your password.")
+            app.password_strength_label.configure(text="Your password is average strength, view the issues and reccomendations belows")
         elif self.score >= 30:
             bar_colour = "orange"
             app.password_strength_label.configure(text="Your password is weak, change your password.")
