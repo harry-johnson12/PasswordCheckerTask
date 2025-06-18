@@ -2,7 +2,7 @@
 ## PassPy
 A lightweight Python application that checks password strength by analysing length, complexity, common patterns, and breach exposure.
 
-PassPy was created by Harry Johnson for his second Y11 Software engineering task and was released on the __
+PassPy was created by Harry Johnson for his second Y11 Software engineering task and was released on the 18/6/2025
 
 
 ## Features
