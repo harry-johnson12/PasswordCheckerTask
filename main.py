@@ -1,7 +1,3 @@
-#IDEAS(GUI): settings - customise for light/dark mode, size parameter could fix the cut off text issue, eventually make the window resizable
-
-#OTHER: also have a password generator, password manager, potentially AI password improver,
-
 import customtkinter as ctk
 import hashlib
 import requests
@@ -210,7 +206,7 @@ class App(ctk.CTk):
 
         self.welcome_text.lift()
 
-class Password_checker:
+class PasswordChecker:
     def __init__(self):
         self.password = ""
         self.rock_you_issue = False
@@ -340,6 +336,8 @@ class Password_checker:
             self.seconds_to_crack = round(self.seconds_to_crack, 2)
                     
     def update_gui(self):
+        if self.password == "joshkenny":
+            app.password_entry.configure(placeholder_text="You have found the easter egg password, well done!")
         bar_colour = "light green"
         if self.score >= 95:
             app.password_strength_label.configure(text="Your password is incredibly strong!")
@@ -381,6 +379,7 @@ class Password_checker:
         for issue in self.password_issues:
             app.password_feedback.insert("end", issue + "\n")
             app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
+        for i in range(2): app.password_feedback.delete("end-1c", "end") # Remove the last newline character to avoid an extra blank line at the end
         app.password_feedback.configure(state="disabled")  # Disable the textbox after updating it
 
         #configure the time to crack label
@@ -417,7 +416,7 @@ class Password_checker:
                 app.time_to_crack_label.configure(text=f"Your password will take: {Seconds} Seconds to crack.")
             
             if Years > 1 * 10**15:
-                app.time_to_crack_label.configure(text="Your password will take over one quadrillion Years to crack")
+                app.time_to_crack_label.configure(text="Your password will take over one quadrillion years to crack by brute force.")
             
         else:
             app.time_to_crack_label.configure(text=f"Your password will be cracked {self.seconds_to_crack}.") # instantly instance
@@ -465,6 +464,6 @@ class Password_checker:
             app.password_entry.configure(placeholder_text="Please enter a password")  # Change the placeholder text to red if no password is entered
             app.focus_set()
 
-password_checker = Password_checker()
+password_checker = PasswordChecker()
 app = App()
 app.mainloop()
