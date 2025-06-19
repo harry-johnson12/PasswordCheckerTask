@@ -267,18 +267,22 @@ class PasswordChecker:
         return self.password in self.common_passwords
 
     def check_for_dictionary_words(self):
+        password_a_word = False
         self.word_count = 0
         containing_words = []
-        for word in self.dictionary_words:
-            if word in self.password.lower():
-                if word == self.password.lower():
-                    self.password_issues.append(f"Your password is the just the word '{word}', which is not secure.")
-                    self.score -= 80
-                    break
-                else: 
+        for word in self.dictionary_words: # Check if the password is a single dictionary word before checking for containing words to ensure no overlaps
+            if word == self.password.lower():
+                self.password_issues.append(f"Your password is the just the word '{word}', which is not secure.")
+                self.score -= 80
+                password_a_word = True
+                break
+        
+        if not password_a_word:  # If the password is not a single dictionary word
+            for word in self.dictionary_words:        
                     self.word_count += 1
                     containing_words.append(word)
                     self.score -= 10
+        
         if self.word_count > 0:
             appending_feedback = "Your password contains: "
             for word in containing_words:
