@@ -278,7 +278,8 @@ class PasswordChecker:
                 break
         
         if not password_a_word:  # If the password is not a single dictionary word
-            for word in self.dictionary_words:        
+            for word in self.dictionary_words:
+                if word in self.password.lower():        
                     self.word_count += 1
                     containing_words.append(word)
                     self.score -= 10
