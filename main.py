@@ -219,27 +219,29 @@ class PasswordChecker:
         self.score = 100
         self.password_issues = []
         self.Seconds_to_crack = 0
+        self.common_passwords = set()
+        self.dictionary_words = set()
         self.load_common_passwords()
         self.load_dictionary_words()
 
-    def load_common_passwords(self, path="rockyou.txt"):
+    def load_common_passwords(self, path="100K-common-passwords.txt"):
         try:
-            with open(path, "r", encoding="utf-8", errors="ignore") as rockyou_file:
-                self.common_passwords = set(line.strip() for line in rockyou_file)
+            with open(path, "r", encoding="utf-8", errors="ignore") as common_passwords_file:
+                self.common_passwords = set(line.strip() for line in common_passwords_file)
         except FileNotFoundError:
             self.rock_you_issue = True
 
-    def load_dictionary_words(self, path="10,000_common_words.txt"):
+    def load_dictionary_words(self, path="10K-common-words.txt"):
         try:
             with open(path, "r", encoding="utf-8", errors="ignore") as dictionary_file:
                 clean_words = set()
-
                 for word in dictionary_file:
                     stripped = word.strip()
                     if len(stripped) >= 4:
                         clean_words.add(stripped.lower())
 
                 self.dictionary_words = clean_words            
+        
         except FileNotFoundError:
             self.common_passwords_issue = True
 
@@ -378,9 +380,9 @@ class PasswordChecker:
         app.password_feedback.delete("0.0", "end")  # Clear the textbox before inserting new issues
 
         if self.rock_you_issue:
-            app.password_feedback.insert("end", "There was an error loading the common passwords file, the common password check will be disabled.\n")
+            app.password_feedback.insert("end", "There was an error loading the common passwords file, the common password check will be disabled.\n\n")
         if self.common_passwords_issue:
-            app.password_feedback.insert("end", "There was an error loading the dictionary words file, the dictionary password check will be disabled.\n")
+            app.password_feedback.insert("end", "There was an error loading the dictionary words file, the dictionary password check will be disabled.\n\n")
         for issue in self.password_issues:
             app.password_feedback.insert("end", issue + "\n")
             app.password_feedback.insert("end", "\n")  # Add a newline after each issue for better readability
