@@ -16,7 +16,7 @@ PassPy was created by Harry Johnson for his second Y11 Software engineering task
 - Generating random passwords that meets best-practice security standards.
 
 ## Dependancies
-(I have installed a requirements.txt for your convinence)
+I have included a requirements.txt for your convinence
 - Custom Tkinter
 - Requests
 - Pyperclip
