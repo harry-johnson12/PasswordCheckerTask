@@ -297,8 +297,7 @@ class PasswordChecker:
     def length_penalty(self):
         if self.password_length >= 16:
             return 0
-        k = 0.25
-        penalty = 50 * math.exp(-k * (self.password_length - 8))
+        penalty = 50 * math.exp(-0.25 * (self.password_length - 8))
         self.password_issues.append(f"Your password is just {self.password_length} characters long. To improve complexity should be at least 16 characters.")
         self.score -= round(min(penalty, 100), 2)
 
@@ -343,8 +342,6 @@ class PasswordChecker:
             self.seconds_to_crack = round(self.seconds_to_crack, 2)
                     
     def update_gui(self):
-        if self.password == "joshkenny":
-            app.password_entry.configure(placeholder_text="You have found the easter egg password, well done!")
         bar_colour = "light green"
         if self.score >= 95:
             app.password_strength_label.configure(text="Your password is incredibly strong!")
@@ -365,6 +362,10 @@ class PasswordChecker:
         else:
             bar_colour = "light grey"
             app.password_strength_label.configure(text="Your password is incredibly weak, change your password.")
+
+        if self.password == "joshkenny!":
+            app.password_strength_label.configure(text="My idol 😍")
+            bar_colour = "pink"
 
         #configure the password strength bar
         app.password_strength_bar.configure(fg_color="light grey")  # Set the background color of the progress bar
@@ -446,6 +447,9 @@ class PasswordChecker:
    
     def check_password_strength(self):
         self.password_issues = []
+        if self.password_length > 45:
+                self.password = self.password[:45]
+                self.password_issues.append("Your password is extremely long, it has been truncated to 45 characters for testing.")
         self.breaches = self.password_breaches()
         self.common = self.check_common_passwords()
         self.length_penalty()
@@ -457,9 +461,8 @@ class PasswordChecker:
 
     def update_password(self):
         if not app.password_entry.get() == "":
-            self.saved_password = self.password  # Save the previous password
             self.password = app.password_entry.get()
-            self.password_length = len(self.password)
+            self.password_length = len(self.password)  # Limit the password length to 50 characters
             self.score = 100
             app.password_entry.delete(0, 'end')  # Clear the entry field after getting the password
             app.password_entry.configure(show="*")
