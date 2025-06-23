@@ -120,11 +120,11 @@ class Menu(ctk.CTkToplevel):
         self.back_button = ctk.CTkButton(self, text="Back", command=self.show_menu, font=(FONT, 12), width=170, height=30, text_color="black", fg_color="light grey", hover_color="dark grey", corner_radius=CORNER_RADIUS)
         
         self.help_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
-        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild.\n\nThere is also a button in the menu which will generate and copy a secure password to your clipboard which you can then test and use.\n\nFor more information, visit the GitHub repository (link in the about section) or open an issue if you have any questions or suggestions.")
+        self.help_text.insert("0.0", "To use PassPy, simply enter your password into the input field and click 'Enter'. The application will then analyze your password and provide feedback on its strength, including any issues that may make it weak or vulnerable to attacks.\n\nDepending on your internet connection there may be issues connecting to the pwned passwords API, in this case to cheeck if your password is breached visit:\nhttps://haveibeenpwned.com/Passwords\n\nYou can also view the time it would take to crack your password based on its mathematical complexity, assuming a GPU guess rate of two hundred billion guesses per second however this is not the greatest measure to test security, hence why it is below the feedback feild.\n\nThere is also a button in the menu which will generate and copy a secure password to your clipboard which you can then test and use.\n\nFor more information, visit the GitHub repository (link in the about section) and feel free to open an issue if you have any questions or suggestions.")
         self.help_text.configure(state="disabled")
         
         self.about_text = ctk.CTkTextbox(self, width=295, height=220, corner_radius=CORNER_RADIUS, font=(FONT, 11), state="normal", fg_color="light grey", text_color="black", scrollbar_button_color="dark grey", wrap="word")
-        self.about_text.insert("0.0", "PassPy is a password strength checker created by Harry Johnson for a year 11 software engineering task. It uses a range of tests including checking your password against common passwords, dictionary words, data breaches in combination with length and character tests to help you create a strong password. \n\nFor more information, visit the GitHub repository:\nhttps://github.com/harry-johnson12/Password-Checker-Task/tree/main\n\nIf you have any questions or suggestions, feel free to open an issue on the GitHub repository.\n\nThank you for using PassPy!")
+        self.about_text.insert("0.0", "PassPy is a password strength checker created by Harry Johnson for his second year 11 software engineering task. It uses a range of tests including checking your password against common passwords, dictionary words, data breaches in combination with length and character tests to help you create a strong password. \n\nFor more information, visit the GitHub repository:\nhttps://github.com/harry-johnson12/Password-Checker-Task/tree/main\n\nIf you have any questions or suggestions, feel free to open an issue.\n\nThank you for using PassPy!")
         self.about_text.configure(state="disabled")
 
         link = "https://github.com/harry-johnson12/Password-Checker-Task/tree/main"
@@ -240,10 +240,10 @@ class PasswordChecker:
                     if len(stripped) >= 4:
                         clean_words.add(stripped.lower())
 
-                self.dictionary_words = clean_words            
+                self.dictionary_words = clean_words  
         
         except FileNotFoundError:
-            self.common_passwords_issue = True
+            self.common_passwords_issue = True          
 
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
