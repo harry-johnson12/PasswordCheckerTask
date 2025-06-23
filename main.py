@@ -1,3 +1,5 @@
+#PASSPY BY HARRY JOHNSON
+
 import customtkinter as ctk
 import hashlib
 import requests
@@ -243,7 +245,7 @@ class PasswordChecker:
                 self.dictionary_words = clean_words  
         
         except FileNotFoundError:
-            self.common_passwords_issue = True          
+            self.common_passwords_issue = True
 
     def password_breaches(self):
         hash = hashlib.sha1(self.password.encode('utf-8')).hexdigest().upper() # Hash the password to the API's required format
