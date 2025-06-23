@@ -28,10 +28,6 @@ Navigate to the PassPy respository https://github.com/harry-johnson12/PasswordCh
 
 Press the green 'Code' Button before 'download zip'
 
-Alternitavley if on a mac navigate to 'PassPy.zip' Before downloading and extracting it, then run the .app file.
-
-NOTE: you may need to navigate to system settings to allow the app to open the app.
-
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
